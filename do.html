@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Radiant To-Do App</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      transition: background 0.5s ease;
+    }
+
+    .hero {
+      text-align: center;
+      color: #ffffff;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      font-size: 3em;
+      margin: 0;
+      text-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+    }
+
+    .hero p {
+      font-size: 1.2em;
+      margin: 10px 0 20px;
+    }
+
+    .todo-container {
+      background: #ffffffcc;
+      backdrop-filter: blur(10px);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      width: 360px;
+      text-align: center;
+      position: relative;
+    }
+
+    .input-section {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    #taskInput {
+      flex: 1;
+      padding: 10px;
+      border: 2px solid #4facfe;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    #taskInput:focus {
+      outline: none;
+      border-color: #00f2fe;
+    }
+
+    #addBtn {
+      padding: 10px 15px;
+      background: #4facfe;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    #addBtn:hover {
+      background: #00f2fe;
+    }
+
+    #taskList {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    #taskList li {
+      background: #f1f5f9;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      position: relative;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+      cursor: pointer;
+    }
+
+    #taskList li.completed {
+      text-decoration: line-through;
+      color: gray;
+      opacity: 0.6;
+    }
+
+    .delete-btn {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      background: #ff6b6b;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 50%;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .delete-btn:hover {
+      background: #e63946;
+    }
+
+    .popup-image {
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 80px;
+      display: none;
+      animation: pop 1s ease-out forwards;
+    }
+
+    @keyframes pop {
+      0% {
+        transform: scale(0.5);
+        opacity: 0;
+      }
+      50% {
+        transform: scale(1.2);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 0;
+      }
+    }
+
+    /* Sidebar badge with scrolling marquee */
+    .sidebar-name {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 200px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+      padding: 6px 10px;
+      border-top-right-radius: 10px;
+      z-index: 999;
+      overflow: hidden;
+    }
+
+    .sidebar-name marquee {
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <h1>Stay Productive!</h1>
+    <p>Organize your tasks and boost your day 💪</p>
+  </div>
+  <div class="todo-container">
+    <h1>To-Do List</h1>
+    <div class="input-section">
+      <input type="text" id="taskInput" placeholder="Enter a new task">
+      <button id="addBtn">Add</button>
+    </div>
+    <ul id="taskList"></ul>
+    <img id="popupImage" class="popup-image" src="https://cdn-icons-png.flaticon.com/512/3159/3159066.png" alt="Added!">
+  </div>
+  <div class="sidebar-name">
+    <marquee scrollamount="4" behavior="scroll" direction="left">-AMBATI ESWAR REDDY-</marquee>
+  </div>
+  <script>
+    const addBtn = document.getElementById('addBtn');
+    const taskInput = document.getElementById('taskInput');
+    const taskList = document.getElementById('taskList');
+    const popupImage = document.getElementById('popupImage');
+    addBtn.addEventListener('click', addTask);
+    taskInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') addTask();
+    });
+    function addTask() {
+      const taskText = taskInput.value.trim();
+      if (taskText !== "") {
+        const li = document.createElement('li');
+        li.textContent = taskText;
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = '×';
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.addEventListener('click', function() {
+          taskList.removeChild(li);
+          saveTasks();
+        });
+        li.appendChild(deleteBtn);
+        li.addEventListener('click', function() {
+          li.classList.toggle('completed');
+          saveTasks();
+        });
+        taskList.appendChild(li);
+        taskInput.value = "";
+        showPopup();
+        saveTasks();
+      }
+    }
+    function showPopup() {
+      popupImage.style.display = 'block';
+      popupImage.style.animation = 'pop 1s ease-out forwards';
+      setTimeout(() => {
+        popupImage.style.display = 'none';
+      }, 1000);
+    }
+    function saveTasks() {
+      const tasks = [];
+      document.querySelectorAll('#taskList li').forEach(li => {
+        tasks.push({
+          text: li.firstChild.textContent.trim(),
+          completed: li.classList.contains('completed')
+        });
+      });
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+    function loadTasks() {
+      const saved = localStorage.getItem('tasks');
+      if (saved) {
+        JSON.parse(saved).forEach(task => {
+          const li = document.createElement('li');
+          li.textContent = task.text;
+          if (task.completed) li.classList.add('completed');
+
+          const deleteBtn = document.createElement('button');
+          deleteBtn.textContent = '×';
+          deleteBtn.className = 'delete-btn';
+          deleteBtn.addEventListener('click', function() {
+            taskList.removeChild(li);
+            saveTasks();
+          });
+
+          li.appendChild(deleteBtn);
+          li.addEventListener('click', function() {
+            li.classList.toggle('completed');
+            saveTasks();
+          });
+
+          taskList.appendChild(li);
+        });
+      }
+    }
+
+    loadTasks();
+  </script>
+</body>
+</html>
